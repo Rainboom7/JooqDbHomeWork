@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'nu.studer.jooq' version '3.0.3'
+    id "org.flywaydb.flyway" version "5.2.4"
+}
+
+group 'dbtest'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile group: 'org.flywaydb', name: 'flyway-core', version: '6.0.0-beta2'
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.6'
+    jooqRuntime 'org.postgresql:postgresql:42.2.6'
+    compile group: 'org.jooq', name: 'jooq', version: '3.11.11'
+    implementation group: 'com.intellij', name: 'annotations', version: '12.0'
+    implementation group: 'org.jooq', name: 'jooq-codegen', version: " 3.11.11"
+    implementation group: 'javax.annotation', name: 'javax.annotation-api', version: '1.3.2'
+}
+
+jooq {
+    version = '3.11.11'
+    edition = 'OSS'
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.postgresql.Driver'
+            url = 'jdbc:postgresql://localhost:3600/test'
+            user = 'postgres'
+            password = 'rainbow7'
+        }
+        generator {
+            name = 'org.jooq.codegen.DefaultGenerator'
+            strategy {
+                name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+            }
+            database {
+                name = 'org.jooq.meta.postgres.PostgresDatabase'
+                inputSchema = 'public'
+                forcedTypes {
+                    forcedType {
+                        name = 'varchar'
+                        expression = '.*'
+                        types = 'JSONB?'
+                    }
+                }
+            }
+            generate {
+                relations = true
+                deprecated = false
+                records = true
+                immutablePojos = true
+                fluentSetters = true
+            }
+            target {
+                packageName = 'db'
+                directory = 'src/main/java'
+            }
+        }
+    }
+}
+
